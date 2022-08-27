@@ -3,11 +3,10 @@ import {
   Scene,
   WebGLRenderer,
   PerspectiveCamera,
-  PointLight,
-  Color,
   Clock,
   LoadingManager,
-  Vector2
+  Vector2,
+  TextureLoader
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
@@ -15,13 +14,14 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 // Remove this if you don't need to load any 3D model
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
-import { Pane } from 'tweakpane'
-
 import { MetalMaterial } from './materials/MetalMaterial'
 import { PipesMaterial } from './materials/PipesMaterial'
 import { LightsMaterial } from './materials/LightsMaterial'
 import { HoloMaterial } from './materials/HoloMaterial'
 import { SignMaterial } from './materials/SignMaterial'
+import { RoundLightMaterial } from './materials/RoundLightMaterial'
+
+import { Debugger } from './Debugger'
 
 class App {
   #resizeCallback = () => this.#onResize()
@@ -35,14 +35,15 @@ class App {
     this.#createScene()
     this.#createCamera()
     this.#createRenderer()
-    this.#createLight()
     this.#createClock()
     this.#addListeners()
     this.#createControls()
-    this.#createDebugPanel()
     this.#createLoaders()
 
+    await this.#loadTextures()
     await this.#loadModel()
+
+    this.debug = new Debugger(this)
 
     this.renderer.setAnimationLoop(() => {
       this.#update()
@@ -86,14 +87,8 @@ class App {
 
     this.renderer.setSize(this.screen.x, this.screen.y)
     this.renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio))
-    this.renderer.setClearColor(0x121212)
+    this.renderer.setClearColor(0x42404d)
     this.renderer.physicallyCorrectLights = true
-  }
-
-  #createLight() {
-    this.pointLight = new PointLight(0xffffff, 500, 100, 2)
-    this.pointLight.position.set(0, 10, 13)
-    this.scene.add(this.pointLight)
   }
 
   #createLoaders() {
@@ -110,6 +105,28 @@ class App {
     }
 
     this.gltfLoader = new GLTFLoader(this.loadingManager)
+
+    this.textureLoader = new TextureLoader(this.loadingManager)
+  }
+
+  async #loadTextures() {
+    this.textures = {}
+
+    const loadTexture = (name, url) => {
+      return this.textureLoader.load(url, texture => {
+        this.textures[name] = texture
+      })
+    }
+
+    const urls = [
+      { name: 'Base_AO', url: '/Base_AO.png' }
+    ]
+
+    const promises = urls.map(({ name, url }) => {
+      return loadTexture(name, url)
+    })
+
+    await Promise.all(promises)
   }
 
   /**
@@ -122,10 +139,15 @@ class App {
         mesh.translateY(-1.3)
         mesh.material = MetalMaterial
 
+        this.textures.Base_AO.flipY = false
+        mesh.geometry.setAttribute('uv2', mesh.geometry.getAttribute('uv').clone())
+        mesh.material.aoMap = this.textures.Base_AO
+
         mesh.getObjectByName('Base_Pipes').material = PipesMaterial
         mesh.getObjectByName('Base_PointLights').material = LightsMaterial
         mesh.getObjectByName('Holo').material = HoloMaterial
         mesh.getObjectByName('Sign').material = SignMaterial
+        mesh.getObjectByName('Base_RoundLight').material = RoundLightMaterial
 
         this.scene.add(mesh)
 
@@ -137,38 +159,6 @@ class App {
   #createControls() {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
     this.controls.enableDamping = true
-  }
-
-  #createDebugPanel() {
-    this.pane = new Pane({
-      container: document.querySelector('#debug')
-    })
-
-    /**
-     * Scene configuration
-     */
-    const sceneFolder = this.pane.addFolder({ title: 'Scene' })
-
-    let params = { background: { r: 18, g: 18, b: 18 } }
-
-    sceneFolder.addInput(params, 'background', { label: 'Background Color' }).on('change', e => {
-      this.renderer.setClearColor(new Color(e.value.r / 255, e.value.g / 255, e.value.b / 255))
-    })
-
-    /**
-     * Light configuration
-     */
-    const lightFolder = this.pane.addFolder({ title: 'Light' })
-
-    params = {
-      color: { r: 255, g: 0, b: 85 }
-    }
-
-    lightFolder.addInput(params, 'color', { label: 'Color' }).on('change', e => {
-      this.pointLight.color = new Color(e.value.r / 255, e.value.g / 255, e.value.b / 255)
-    })
-
-    lightFolder.addInput(this.pointLight, 'intensity', { label: 'Intensity', min: 0, max: 1000 })
   }
 
   #createClock() {
