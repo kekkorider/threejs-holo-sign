@@ -17,6 +17,12 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 import { Pane } from 'tweakpane'
 
+import { MetalMaterial } from './materials/MetalMaterial'
+import { PipesMaterial } from './materials/PipesMaterial'
+import { LightsMaterial } from './materials/LightsMaterial'
+import { HoloMaterial } from './materials/HoloMaterial'
+import { SignMaterial } from './materials/SignMaterial'
+
 class App {
   #resizeCallback = () => this.#onResize()
 
@@ -114,6 +120,13 @@ class App {
       this.gltfLoader.load('./model.glb', gltf => {
         const mesh = gltf.scene.children[0]
         mesh.translateY(-1.3)
+        mesh.material = MetalMaterial
+
+        mesh.getObjectByName('Base_Pipes').material = PipesMaterial
+        mesh.getObjectByName('Base_PointLights').material = LightsMaterial
+        mesh.getObjectByName('Holo').material = HoloMaterial
+        mesh.getObjectByName('Sign').material = SignMaterial
+
         this.scene.add(mesh)
 
         resolve()
