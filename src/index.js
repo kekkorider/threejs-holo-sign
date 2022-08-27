@@ -3,9 +3,6 @@ import {
   Scene,
   WebGLRenderer,
   PerspectiveCamera,
-  BoxGeometry,
-  MeshStandardMaterial,
-  Mesh,
   PointLight,
   Color,
   Clock,
@@ -20,8 +17,6 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
 import { Pane } from 'tweakpane'
 
-import { SampleShaderMaterial } from './materials/SampleShaderMaterial'
-
 class App {
   #resizeCallback = () => this.#onResize()
 
@@ -34,8 +29,6 @@ class App {
     this.#createScene()
     this.#createCamera()
     this.#createRenderer()
-    this.#createBox()
-    this.#createShadedBox()
     this.#createLight()
     this.#createClock()
     this.#addListeners()
@@ -61,11 +54,7 @@ class App {
   #update() {
     const elapsed = this.clock.getElapsedTime()
 
-    this.box.rotation.y = elapsed
-    this.box.rotation.z = elapsed*0.6
-
-    this.shadedBox.rotation.y = elapsed
-    this.shadedBox.rotation.z = elapsed*0.6
+    this.controls.update()
   }
 
   #render() {
@@ -78,7 +67,7 @@ class App {
 
   #createCamera() {
     this.camera = new PerspectiveCamera(75, this.screen.x / this.screen.y, 0.1, 100)
-    this.camera.position.set(-4, 4, 10)
+    this.camera.position.set(0, 1.3, 3)
   }
 
   #createRenderer() {
@@ -96,49 +85,9 @@ class App {
   }
 
   #createLight() {
-    this.pointLight = new PointLight(0xff0055, 500, 100, 2)
+    this.pointLight = new PointLight(0xffffff, 500, 100, 2)
     this.pointLight.position.set(0, 10, 13)
     this.scene.add(this.pointLight)
-  }
-
-  /**
-   * Create a box with a PBR material
-   */
-  #createBox() {
-    const geometry = new BoxGeometry(1, 1, 1, 1, 1, 1)
-
-    const material = new MeshStandardMaterial({
-      color: 0xffffff,
-      metalness: 0.7,
-      roughness: 0.35
-    })
-
-    this.box = new Mesh(geometry, material)
-
-    this.box.scale.x = 4
-    this.box.scale.y = 4
-    this.box.scale.z = 4
-
-    this.box.position.x = -5
-
-    this.scene.add(this.box)
-  }
-
-  /**
-   * Create a box with a custom ShaderMaterial
-   */
-  #createShadedBox() {
-    const geometry = new BoxGeometry(1, 1, 1, 1, 1, 1)
-
-    this.shadedBox = new Mesh(geometry, SampleShaderMaterial)
-
-    this.shadedBox.scale.x = 4
-    this.shadedBox.scale.y = 4
-    this.shadedBox.scale.z = 4
-
-    this.shadedBox.position.x = 5
-
-    this.scene.add(this.shadedBox)
   }
 
   #createLoaders() {
@@ -164,16 +113,7 @@ class App {
     return new Promise(resolve => {
       this.gltfLoader.load('./model.glb', gltf => {
         const mesh = gltf.scene.children[0]
-
-        mesh.scale.x = 4
-        mesh.scale.y = 4
-        mesh.scale.z = 4
-
-        mesh.position.z = 5
-
-        mesh.material = SampleShaderMaterial.clone()
-        mesh.material.wireframe = true
-
+        mesh.translateY(-1.3)
         this.scene.add(mesh)
 
         resolve()
@@ -183,6 +123,7 @@ class App {
 
   #createControls() {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+    this.controls.enableDamping = true
   }
 
   #createDebugPanel() {
@@ -200,24 +141,6 @@ class App {
     sceneFolder.addInput(params, 'background', { label: 'Background Color' }).on('change', e => {
       this.renderer.setClearColor(new Color(e.value.r / 255, e.value.g / 255, e.value.b / 255))
     })
-
-    /**
-     * Box configuration
-     */
-    const boxFolder = this.pane.addFolder({ title: 'Box' })
-
-    boxFolder.addInput(this.box.scale, 'x', { label: 'Width', min: 1, max: 8 })
-      .on('change', e => this.shadedBox.scale.x = e.value)
-
-    boxFolder.addInput(this.box.scale, 'y', { label: 'Height', min: 1, max: 8 })
-      .on('change', e => this.shadedBox.scale.y = e.value)
-
-    boxFolder.addInput(this.box.scale, 'z', { label: 'Depth', min: 1, max: 8 })
-      .on('change', e => this.shadedBox.scale.z = e.value)
-
-    boxFolder.addInput(this.box.material, 'metalness', { label: 'Metallic', min: 0, max: 1 })
-
-    boxFolder.addInput(this.box.material, 'roughness', { label: 'Roughness', min: 0, max: 1 })
 
     /**
      * Light configuration
