@@ -11,6 +11,7 @@ export class Debugger {
     this.#createPipesConfig()
     this.#createPointLightsConfig()
     this.#createRoundLightConfig()
+    this.#createHoloConfig()
   }
 
   refresh() {
@@ -34,36 +35,52 @@ export class Debugger {
 
   #createBaseConfig() {
     const folder = this.pane.addFolder({ title: 'Base' })
+    const mesh = this.app.scene.getObjectByName('Base')
 
-    this.#createColorControl('Base', folder)
-    folder.addInput(this.app.scene.getObjectByName('Base').material, 'aoMapIntensity', { label: 'AO Map Intensity', min: 0, max: 1 })
+    this.#createColorControl(mesh, folder)
+    folder.addInput(mesh.material, 'aoMapIntensity', { label: 'AO Map Intensity', min: 0, max: 1 })
   }
 
   #createPipesConfig() {
     const folder = this.pane.addFolder({ title: 'Pipes' })
+    const mesh = this.app.scene.getObjectByName('Base_Pipes')
 
-    this.#createColorControl('Base_Pipes', folder)
+    this.#createColorControl(mesh, folder)
   }
 
   #createPointLightsConfig() {
     const folder = this.pane.addFolder({ title: 'Point Lights' })
+    const mesh = this.app.scene.getObjectByName('Base_PointLights')
 
-    this.#createColorControl('Base_PointLights', folder)
-    this.#createEmissiveControl('Base_PointLights', folder)
-    this.#createEmissiveIntensityControl('Base_PointLights', folder)
+    this.#createColorControl(mesh, folder)
+    this.#createEmissiveControl(mesh, folder)
+    this.#createEmissiveIntensityControl(mesh, folder)
   }
 
   #createRoundLightConfig() {
     const folder = this.pane.addFolder({ title: 'Round Light' })
+    const mesh = this.app.scene.getObjectByName('Base_RoundLight')
 
-    this.#createColorControl('Base_RoundLight', folder)
-    this.#createEmissiveControl('Base_RoundLight', folder)
-    this.#createEmissiveIntensityControl('Base_RoundLight', folder)
+    this.#createColorControl(mesh, folder)
+    this.#createEmissiveControl(mesh, folder)
+    this.#createEmissiveIntensityControl(mesh, folder)
   }
 
-  #createColorControl(meshName, folder) {
-    const mesh = this.app.scene.getObjectByName(meshName)
-    const baseColor255 = mesh.material.clone().color.multiplyScalar(255)
+  #createHoloConfig() {
+    const folder = this.pane.addFolder({ title: 'Holo' })
+    const mesh = this.app.scene.getObjectByName('Holo')
+
+    folder.addInput(mesh.material.uniforms.u_Progress, 'value', { label: 'Progress', min: 0, max: 1 })
+
+    const color = mesh.material.uniforms.u_Color.value.clone().multiplyScalar(255)
+    const params = { color: { r: color.r, g: color.g, b: color.b } }
+    folder.addInput(params, 'color', { label: 'Color' }).on('change', e => {
+      mesh.material.uniforms.u_Color.value.setRGB(e.value.r, e.value.g, e.value.b).multiplyScalar(1 / 255)
+    })
+  }
+
+  #createColorControl(mesh, folder) {
+    const baseColor255 = mesh.material.color.clone().multiplyScalar(255)
     const params = { color: { r: baseColor255.r, g: baseColor255.g, b: baseColor255.b } }
 
     folder.addInput(params, 'color', { label: 'Color' }).on('change', e => {
@@ -71,9 +88,8 @@ export class Debugger {
     })
   }
 
-  #createEmissiveControl(meshName, folder) {
-    const mesh = this.app.scene.getObjectByName(meshName)
-    const baseColor255 = mesh.material.clone().emissive.multiplyScalar(255)
+  #createEmissiveControl(mesh, folder) {
+    const baseColor255 = mesh.material.emissive.clone().multiplyScalar(255)
     const params = { emissive: { r: baseColor255.r, g: baseColor255.g, b: baseColor255.b } }
 
     folder.addInput(params, 'emissive', { label: 'Emissive' }).on('change', e => {
@@ -81,9 +97,7 @@ export class Debugger {
     })
   }
 
-  #createEmissiveIntensityControl(meshName, folder) {
-    const mesh = this.app.scene.getObjectByName(meshName)
-
+  #createEmissiveIntensityControl(mesh, folder) {
     folder.addInput(mesh.material, 'emissiveIntensity', { label: 'Emissive Intensity', min: 0, max: 3 })
   }
 }

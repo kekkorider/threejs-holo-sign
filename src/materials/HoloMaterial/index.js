@@ -1,8 +1,15 @@
-import { ShaderMaterial, DoubleSide } from 'three'
+import { ShaderMaterial, DoubleSide, Color, AdditiveBlending } from 'three'
 
 export const HoloMaterial = new ShaderMaterial({
   vertexShader: require('./vertex.glsl'),
   fragmentShader: require('./fragment.glsl'),
   transparent: true,
-  side: DoubleSide
+  side: DoubleSide,
+  blending: AdditiveBlending,
+  uniforms: {
+    u_Progress: { value: 1 },
+    u_Color: { value: new Color(0x4feaff) },
+    u_Time: { value: 0 },
+    t_AlphaMap: { value: null }
+  }
 })

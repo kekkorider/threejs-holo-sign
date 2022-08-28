@@ -6,7 +6,8 @@ import {
   Clock,
   LoadingManager,
   Vector2,
-  TextureLoader
+  TextureLoader,
+  RepeatWrapping
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
@@ -19,7 +20,7 @@ import { PipesMaterial } from './materials/PipesMaterial'
 import { LightsMaterial } from './materials/LightsMaterial'
 import { HoloMaterial } from './materials/HoloMaterial'
 import { SignMaterial } from './materials/SignMaterial'
-import { RoundLightMaterial } from './materials/RoundLightMaterial'
+import { NeonMaterial } from './materials/NeonMaterial'
 
 import { Debugger } from './Debugger'
 
@@ -62,6 +63,11 @@ class App {
     const elapsed = this.clock.getElapsedTime()
 
     this.controls.update()
+
+    this.sign.rotation.y = elapsed*0.35
+    this.sign.position.y = this.sign.userData.defaultPosY + 0.2 + Math.sin(elapsed*1.4)*0.1
+
+    this.holo.material.uniforms.u_Time.value = elapsed
   }
 
   #render() {
@@ -119,7 +125,8 @@ class App {
     }
 
     const urls = [
-      { name: 'Base_AO', url: '/Base_AO.png' }
+      { name: 'Base_AO', url: '/Base_AO.png' },
+      { name: 'Holo_Alpha', url: '/Holo_Alpha.png' }
     ]
 
     const promises = urls.map(({ name, url }) => {
@@ -135,21 +142,28 @@ class App {
   #loadModel() {
     return new Promise(resolve => {
       this.gltfLoader.load('./model.glb', gltf => {
-        const mesh = gltf.scene.children[0]
-        mesh.translateY(-1.3)
-        mesh.material = MetalMaterial
+        this.mesh = gltf.scene.children[0]
+        this.mesh.translateY(-1.3)
+        this.mesh.material = MetalMaterial
 
         this.textures.Base_AO.flipY = false
-        mesh.geometry.setAttribute('uv2', mesh.geometry.getAttribute('uv').clone())
-        mesh.material.aoMap = this.textures.Base_AO
+        this.mesh.geometry.setAttribute('uv2', this.mesh.geometry.getAttribute('uv').clone())
+        this.mesh.material.aoMap = this.textures.Base_AO
 
-        mesh.getObjectByName('Base_Pipes').material = PipesMaterial
-        mesh.getObjectByName('Base_PointLights').material = LightsMaterial
-        mesh.getObjectByName('Holo').material = HoloMaterial
-        mesh.getObjectByName('Sign').material = SignMaterial
-        mesh.getObjectByName('Base_RoundLight').material = RoundLightMaterial
+        this.mesh.getObjectByName('Base_Pipes').material = PipesMaterial
+        this.mesh.getObjectByName('Base_PointLights').material = LightsMaterial
+        this.mesh.getObjectByName('Base_RoundLight').material = NeonMaterial
 
-        this.scene.add(mesh)
+        this.holo = this.mesh.getObjectByName('Holo')
+        this.holo.material = HoloMaterial
+        this.textures.Holo_Alpha.wrapT = RepeatWrapping
+        this.holo.material.uniforms.t_AlphaMap.value = this.textures.Holo_Alpha
+
+        this.sign = this.mesh.getObjectByName('Sign')
+        this.sign.material = SignMaterial
+        this.sign.userData.defaultPosY = this.sign.position.y
+
+        this.scene.add(this.mesh)
 
         resolve()
       })
