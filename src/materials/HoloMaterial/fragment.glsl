@@ -1,21 +1,29 @@
 varying vec2 vUv;
+varying vec3 vWorldPosition;
+varying vec3 vWorldNormal;
 
 uniform float u_Progress;
 uniform float u_Time;
 uniform vec3 u_Color;
+uniform float u_FresnelFalloff;
 uniform sampler2D t_AlphaMap;
 
 #pragma glslify: noise = require(../../shaders/modules/noise.glsl)
 #pragma glslify: remap = require(../../shaders/modules/remap.glsl)
+#pragma glslify: fresnel = require(../../shaders/modules/fresnel.glsl)
 
 void main() {
-  vec2 gv = floor(vUv * 60.0 + vec2(0.0, u_Time));
+  vec2 gv = floor(vUv * 35.0 - vec2(0.0, u_Time*1.5));
   float pattern = noise(gv);
-
-  float noisy = noise(floor(vUv*1000.));
 
   // alpha map
   float alphaMapB = texture2D(t_AlphaMap, vUv * vec2(0.0, 0.8) + vec2(0.0, u_Time*0.03)).b;
+
+  float noisy = noise(floor(vUv*1000.));
+  noisy *= alphaMapB;
+
+  // Fresnel
+  float frn = fresnel(cameraPosition, vWorldPosition, vWorldNormal, u_FresnelFalloff);
 
   // Colors
   vec4 l1 = vec4(u_Color, 0.5);
@@ -45,9 +53,16 @@ void main() {
   vec4 layer0 = mix(vec4(0.0), l1, 1.0 - mix1);
 
   vec4 color = layer0 * clamp(alphaMapB, 0.1, 0.85);
-  color.a = clamp(noisy, 0.0, 0.3);
 
   color = mix(color, bands, bands.a);
+  color.a = clamp(noisy, 0.0, 0.35);
+
+  #if !defined(FLIP_SIDED)
+    color = mix(color, layer0, frn);
+  #endif
 
   gl_FragColor = color;
+
+  // cool colors
+  // gl_FragColor = vec4(vWorldPosition*vWorldNormal, 1.0);
 }

@@ -77,6 +77,8 @@ export class Debugger {
     folder.addInput(params, 'color', { label: 'Color' }).on('change', e => {
       mesh.material.uniforms.u_Color.value.setRGB(e.value.r, e.value.g, e.value.b).multiplyScalar(1 / 255)
     })
+
+    folder.addInput(mesh.material.uniforms.u_FresnelFalloff, 'value', { label: 'Fresnel falloff', min: 0.1, max: 6 })
   }
 
   #createColorControl(mesh, folder) {
