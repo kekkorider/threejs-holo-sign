@@ -53,9 +53,9 @@ void main() {
   vec4 layer0 = mix(vec4(0.0), l1, 1.0 - mix1);
 
   vec4 color = layer0 * clamp(alphaMapB, 0.1, 0.85);
+  color.a = clamp(noisy, 0.0, 0.35);
 
   color = mix(color, bands, bands.a);
-  color.a = clamp(noisy, 0.0, 0.35);
 
   #if !defined(FLIP_SIDED)
     color = mix(color, layer0, frn);
