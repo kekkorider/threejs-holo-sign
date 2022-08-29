@@ -11,6 +11,7 @@ uniform sampler2D t_AlphaMap;
 #pragma glslify: noise = require(../../shaders/modules/noise.glsl)
 #pragma glslify: remap = require(../../shaders/modules/remap.glsl)
 #pragma glslify: fresnel = require(../../shaders/modules/fresnel.glsl)
+#pragma glslify: random = require(../../shaders/modules/random.glsl)
 
 void main() {
   vec2 gv = floor(vUv * 35.0 - vec2(0.0, u_Time*1.5));
@@ -19,7 +20,8 @@ void main() {
   // alpha map
   float alphaMapB = texture2D(t_AlphaMap, vUv * vec2(0.0, 0.8) + vec2(0.0, u_Time*0.03)).b;
 
-  float noisy = noise(floor(vUv*1000.));
+  // Noise
+  float noisy = noise(floor(vUv*1000.) + floor(random(u_Time)*100.0));
   noisy *= alphaMapB;
 
   // Fresnel
