@@ -12,6 +12,7 @@ export class Debugger {
     this.#createPointLightsConfig()
     this.#createRoundLightConfig()
     this.#createHoloConfig()
+    this.#createScreenConfig()
   }
 
   refresh() {
@@ -81,6 +82,21 @@ export class Debugger {
     folder.addInput(mesh.material.uniforms.u_FresnelFalloff, 'value', { label: 'Fresnel falloff', min: 0.1, max: 6 })
   }
 
+  #createScreenConfig() {
+    const folder = this.pane.addFolder({ title: 'Screen' })
+    const border = this.app.scene.getObjectByName('Sign')
+
+    this.#createEmissiveControl(border, folder, 'Border color')
+    this.#createEmissiveIntensityControl(border, folder, 'Border intensity')
+
+    const screen = this.app.scene.getObjectByName('Sign_Screen')
+    const screenColor = screen.material.uniforms.u_Color.value.clone().multiplyScalar(255)
+    const params = { color: { r: screenColor.r, g: screenColor.g, b: screenColor.b } }
+    folder.addInput(params, 'color', { label: 'Color' }).on('change', e => {
+      screen.material.uniforms.u_Color.value.setRGB(e.value.r, e.value.g, e.value.b).multiplyScalar(1 / 255)
+    })
+  }
+
   #createColorControl(mesh, folder) {
     const baseColor255 = mesh.material.color.clone().multiplyScalar(255)
     const params = { color: { r: baseColor255.r, g: baseColor255.g, b: baseColor255.b } }
@@ -90,16 +106,16 @@ export class Debugger {
     })
   }
 
-  #createEmissiveControl(mesh, folder) {
+  #createEmissiveControl(mesh, folder, label = 'Emissive') {
     const baseColor255 = mesh.material.emissive.clone().multiplyScalar(255)
     const params = { emissive: { r: baseColor255.r, g: baseColor255.g, b: baseColor255.b } }
 
-    folder.addInput(params, 'emissive', { label: 'Emissive' }).on('change', e => {
+    folder.addInput(params, 'emissive', { label }).on('change', e => {
       mesh.material.emissive.setRGB(e.value.r, e.value.g, e.value.b).multiplyScalar(1 / 255)
     })
   }
 
-  #createEmissiveIntensityControl(mesh, folder) {
-    folder.addInput(mesh.material, 'emissiveIntensity', { label: 'Emissive Intensity', min: 0, max: 3 })
+  #createEmissiveIntensityControl(mesh, folder, label = 'Emissive Intensity') {
+    folder.addInput(mesh.material, 'emissiveIntensity', { label, min: 0, max: 3 })
   }
 }

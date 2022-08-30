@@ -7,7 +7,8 @@ import {
   LoadingManager,
   Vector2,
   TextureLoader,
-  RepeatWrapping
+  RepeatWrapping,
+  DoubleSide
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
@@ -19,8 +20,8 @@ import { MetalMaterial } from './materials/MetalMaterial'
 import { PipesMaterial } from './materials/PipesMaterial'
 import { LightsMaterial } from './materials/LightsMaterial'
 import { HoloMaterial } from './materials/HoloMaterial'
-import { SignMaterial } from './materials/SignMaterial'
 import { NeonMaterial } from './materials/NeonMaterial'
+import { ScreenMaterial } from './materials/ScreenMaterial'
 
 import { Debugger } from './Debugger'
 
@@ -42,6 +43,9 @@ class App {
     this.#createLoaders()
 
     await this.#loadTextures()
+
+    this.textures.Holo_Alpha.wrapT = RepeatWrapping
+
     await this.#loadModel()
 
     this.debug = new Debugger(this)
@@ -68,6 +72,7 @@ class App {
     this.sign.position.y = this.sign.userData.defaultPosY + 0.2 + Math.sin(elapsed*1.4)*0.1
 
     this.holo.material.uniforms.u_Time.value = elapsed
+    this.signScreen.material.uniforms.u_Time.value = elapsed
   }
 
   #render() {
@@ -119,8 +124,11 @@ class App {
     this.textures = {}
 
     const loadTexture = (name, url) => {
-      return this.textureLoader.load(url, texture => {
-        this.textures[name] = texture
+      return new Promise(resolve => {
+        this.textureLoader.load(url, texture => {
+          this.textures[name] = texture
+          resolve()
+        })
       })
     }
 
@@ -129,7 +137,7 @@ class App {
       { name: 'Holo_Alpha', url: '/Holo_Alpha.png' }
     ]
 
-    const promises = urls.map(({ name, url }) => {
+    const promises = urls.map(async ({ name, url }) => {
       return loadTexture(name, url)
     })
 
@@ -156,12 +164,16 @@ class App {
 
         this.holo = this.mesh.getObjectByName('Holo')
         this.holo.material = HoloMaterial
-        this.textures.Holo_Alpha.wrapT = RepeatWrapping
         this.holo.material.uniforms.t_AlphaMap.value = this.textures.Holo_Alpha
 
         this.sign = this.mesh.getObjectByName('Sign')
-        this.sign.material = SignMaterial
+        this.sign.material = NeonMaterial.clone()
+        this.sign.material.side = DoubleSide
         this.sign.userData.defaultPosY = this.sign.position.y
+
+        this.signScreen = this.mesh.getObjectByName('Sign_Screen')
+        this.signScreen.material = ScreenMaterial
+        this.signScreen.material.uniforms.t_AlphaMap.value = this.textures.Holo_Alpha
 
         this.scene.add(this.mesh)
 
