@@ -98,7 +98,7 @@ class App {
 
     this.renderer.setSize(this.screen.x, this.screen.y)
     this.renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio))
-    this.renderer.setClearColor(0x42404d)
+    this.renderer.setClearColor(0x000000)
     this.renderer.physicallyCorrectLights = true
   }
 

@@ -27,7 +27,7 @@ export class Debugger {
 
   #createSceneConfig() {
     const folder = this.pane.addFolder({ title: 'Scene' })
-    const params = { background: { r: 66, g: 64, b: 77 } }
+    const params = { background: { r: 0, g: 0, b: 0 } }
 
     folder.addInput(params, 'background', { label: 'Background Color' }).on('change', e => {
       this.app.renderer.setClearColor(new Color(e.value.r / 255, e.value.g / 255, e.value.b / 255))
@@ -71,7 +71,10 @@ export class Debugger {
     const folder = this.pane.addFolder({ title: 'Holo' })
     const mesh = this.app.scene.getObjectByName('Holo')
 
-    folder.addInput(mesh.material.uniforms.u_Progress, 'value', { label: 'Progress', min: 0, max: 1 })
+    folder.addInput(mesh.material.uniforms.u_Progress1, 'value', { label: 'Progress 1', min: 0, max: 1 })
+    folder.addInput(mesh.material.uniforms.u_Progress2, 'value', { label: 'Progress 2', min: 0, max: 1 })
+    folder.addInput(mesh.material.uniforms.u_Progress3, 'value', { label: 'Progress 3', min: 0, max: 1 })
+    folder.addInput(mesh.material.uniforms.u_TransitionSmoothness, 'value', { label: 'Transition smoothness', min: 0, max: 1 })
 
     const color = mesh.material.uniforms.u_Color.value.clone().multiplyScalar(255)
     const params = { color: { r: color.r, g: color.g, b: color.b } }
