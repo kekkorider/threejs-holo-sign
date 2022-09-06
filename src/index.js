@@ -16,6 +16,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 // Remove this if you don't need to load any 3D model
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 
+import { gsap } from 'gsap'
+
 import { MetalMaterial } from './materials/MetalMaterial'
 import { PipesMaterial } from './materials/PipesMaterial'
 import { LightsMaterial } from './materials/LightsMaterial'
@@ -47,10 +49,11 @@ class App {
     this.textures.Holo_Alpha.wrapT = RepeatWrapping
 
     await this.#loadModel()
+    this.#createHoloAnimation()
 
-    this.debug = new Debugger(this)
+    this.debugger = new Debugger(this)
 
-    this.renderer.setAnimationLoop(() => {
+    gsap.ticker.add(() => {
       this.#update()
       this.#render()
     })
@@ -169,6 +172,7 @@ class App {
         this.sign = this.mesh.getObjectByName('Sign')
         this.sign.material = NeonMaterial.clone()
         this.sign.material.side = DoubleSide
+        this.sign.material.transparent = true
         this.sign.userData.defaultPosY = this.sign.position.y
 
         this.signScreen = this.mesh.getObjectByName('Sign_Screen')
@@ -180,6 +184,27 @@ class App {
         resolve()
       })
     })
+  }
+
+  #createHoloAnimation() {
+    this.holoAnimation = new gsap.timeline({
+      paused: true,
+      onUpdate: () => {
+        this.debugger.pane.refresh()
+      }
+    })
+
+    this.holoAnimation
+      .addLabel('start')
+
+      .fromTo(this.holo.material.uniforms.u_Progress1, { value: 0 }, { value: 1, duration: 1.25, overwrite: true }, 'start')
+      .fromTo(this.holo.material.uniforms.u_Progress2, { value: 0 }, { value: 1, duration: 1.25, overwrite: true }, 'start+=0.16')
+      .fromTo(this.holo.material.uniforms.u_Progress3, { value: 0 }, { value: 1, duration: 1.25, overwrite: true }, 'start+=0.28')
+
+      .addLabel('animateInSign', 'start+=1')
+
+      .fromTo(this.sign.material, { opacity: 0 }, { opacity: 1, duration: 1.8 }, 'animateInSign')
+      .fromTo(this.signScreen.material.uniforms.u_Opacity, { value: 0 }, { value: 1, duration: 1.8 }, 'animateInSign')
   }
 
   #createControls() {

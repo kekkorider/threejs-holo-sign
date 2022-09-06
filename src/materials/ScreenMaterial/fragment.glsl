@@ -1,6 +1,7 @@
 varying vec2 vUv;
 
 uniform float u_Time;
+uniform float u_Opacity;
 uniform vec3 u_Color;
 uniform sampler2D t_AlphaMap;
 
@@ -37,5 +38,5 @@ void main() {
 
   vec4 mix4 = mix(mix3, l4, l4.a);
 
-  gl_FragColor = mix4;
+  gl_FragColor = mix4*u_Opacity;
 }

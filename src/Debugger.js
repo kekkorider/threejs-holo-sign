@@ -27,10 +27,22 @@ export class Debugger {
 
   #createSceneConfig() {
     const folder = this.pane.addFolder({ title: 'Scene' })
-    const params = { background: { r: 0, g: 0, b: 0 } }
+    const params = {
+      background: { r: 0, g: 0, b: 0 },
+      holoAnimation: 0
+    }
 
     folder.addInput(params, 'background', { label: 'Background Color' }).on('change', e => {
       this.app.renderer.setClearColor(new Color(e.value.r / 255, e.value.g / 255, e.value.b / 255))
+    })
+
+    folder.addInput(params, 'holoAnimation', { label: 'Holo Animation Progress', min: 0, max: 1 }).on('change', e => {
+      this.app.holoAnimation.pause()
+      this.app.holoAnimation.progress(e.value)
+    })
+
+    folder.addButton({ title: 'Animate holo' }).on('click', () => {
+      this.app.holoAnimation.restart()
     })
   }
 
