@@ -240,6 +240,7 @@ class App {
 
   #createControls() {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+    this.controls.enabled = false
     this.controls.enableDamping = true
     this.controls.autoRotate = true
     this.controls.maxPolarAngle = Math.PI / 1.6

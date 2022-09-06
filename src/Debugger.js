@@ -44,13 +44,13 @@ export class Debugger {
       this.app.holoAnimation.progress(e.value)
     })
 
-    folder.addButton({ title: 'Animate holo' }).on('click', () => {
+    folder.addButton({ title: 'Animate Holo' }).on('click', () => {
       this.app.holoAnimation.restart()
     })
   }
 
   #createBloomConfig() {
-    const folder = this.pane.addFolder({ title: 'Postprocess - Bloom' })
+    const folder = this.pane.addFolder({ title: 'Postprocess - Bloom', expanded: false })
 
     folder.addInput(this.app.bloomPass, 'enabled', { label: 'Enabled' })
     folder.addInput(this.app.bloomPass, 'threshold', { label: 'Threshold', min: 0, max: 1 })
@@ -59,7 +59,7 @@ export class Debugger {
   }
 
   #createFXAAPassConfig() {
-    const folder = this.pane.addFolder({ title: 'Postprocess - FXAA' })
+    const folder = this.pane.addFolder({ title: 'Postprocess - FXAA', expanded: false })
 
     folder.addInput(this.app.fxaaPass, 'enabled', { label: 'Enabled' })
   }
