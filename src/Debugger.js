@@ -9,6 +9,7 @@ export class Debugger {
     this.#createSceneConfig()
     this.#createBloomConfig()
     this.#createFXAAPassConfig()
+    this.#createFloorConfig()
     this.#createBaseConfig()
     this.#createPipesConfig()
     this.#createPointLightsConfig()
@@ -61,6 +62,21 @@ export class Debugger {
     const folder = this.pane.addFolder({ title: 'Postprocess - FXAA' })
 
     folder.addInput(this.app.fxaaPass, 'enabled', { label: 'Enabled' })
+  }
+
+  #createFloorConfig() {
+    const folder = this.pane.addFolder({ title: 'Floor', expanded: false })
+    const mesh = this.app.scene.getObjectByName('Floor')
+
+    const color = mesh.material.uniforms.u_Color.value.clone().multiplyScalar(255)
+    const params = { color: { r: color.r, g: color.g, b: color.b } }
+    folder.addInput(params, 'color', { label: 'Color' }).on('change', e => {
+      mesh.material.uniforms.u_Color.value.setRGB(e.value.r, e.value.g, e.value.b).multiplyScalar(1 / 255)
+    })
+
+    folder.addInput(mesh.material.uniforms.u_aoMapIntensity, 'value', { label: 'AO Map Intensity', min: 0, max: 1 })
+    folder.addInput(mesh.material.uniforms.u_SpotlightRadius, 'value', { label: 'Spotlight Radius', min: 0, max: 1 })
+    folder.addInput(mesh.material.uniforms.u_SpotlightBlur, 'value', { label: 'Spotlight Blur', min: 0, max: 1 })
   }
 
   #createBaseConfig() {

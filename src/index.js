@@ -31,6 +31,7 @@ import { LightsMaterial } from './materials/LightsMaterial'
 import { HoloMaterial } from './materials/HoloMaterial'
 import { NeonMaterial } from './materials/NeonMaterial'
 import { ScreenMaterial } from './materials/ScreenMaterial'
+import { FloorMaterial } from './materials/FloorMaterial'
 
 import { Debugger } from './Debugger'
 
@@ -55,6 +56,7 @@ class App {
     await this.#loadTextures()
 
     this.textures.Holo_Alpha.wrapT = RepeatWrapping
+    this.textures.Floor_AO.flipY = false
 
     await this.#loadModel()
     this.#createHoloAnimation()
@@ -158,7 +160,8 @@ class App {
 
     const urls = [
       { name: 'Base_AO', url: '/Base_AO.png' },
-      { name: 'Holo_Alpha', url: '/Holo_Alpha.png' }
+      { name: 'Holo_Alpha', url: '/Holo_Alpha.png' },
+      { name: 'Floor_AO', url: '/Floor_AO.png' }
     ]
 
     const promises = urls.map(async ({ name, url }) => {
@@ -202,7 +205,12 @@ class App {
         this.signScreen.material = ScreenMaterial
         this.signScreen.material.uniforms.t_AlphaMap.value = this.textures.Holo_Alpha
 
-        this.scene.add(this.mesh)
+        this.floor = gltf.scene.getObjectByName('Floor')
+        this.floor.position.y = -1.31
+        this.floor.material = FloorMaterial
+        this.floor.material.uniforms.t_aoMap.value = this.textures.Floor_AO
+
+        this.scene.add(this.mesh, this.floor)
 
         resolve()
       })
