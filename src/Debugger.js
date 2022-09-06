@@ -8,6 +8,7 @@ export class Debugger {
     this.#createPanel()
     this.#createSceneConfig()
     this.#createBloomConfig()
+    this.#createFXAAPassConfig()
     this.#createBaseConfig()
     this.#createPipesConfig()
     this.#createPointLightsConfig()
@@ -54,6 +55,12 @@ export class Debugger {
     folder.addInput(this.app.bloomPass, 'threshold', { label: 'Threshold', min: 0, max: 1 })
     folder.addInput(this.app.bloomPass, 'strength', { label: 'Strength', min: 0, max: 3 })
     folder.addInput(this.app.bloomPass, 'radius', { label: 'Radius', min: 0, max: 1 })
+  }
+
+  #createFXAAPassConfig() {
+    const folder = this.pane.addFolder({ title: 'Postprocess - FXAA' })
+
+    folder.addInput(this.app.fxaaPass, 'enabled', { label: 'Enabled' })
   }
 
   #createBaseConfig() {

@@ -9,7 +9,7 @@ import {
   TextureLoader,
   RepeatWrapping,
   DoubleSide,
-  Color
+  Vector3
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
@@ -96,7 +96,7 @@ class App {
 
   #createCamera() {
     this.camera = new PerspectiveCamera(75, this.screen.x / this.screen.y, 0.1, 100)
-    this.camera.position.set(0, 0.6, 2.7)
+    this.camera.position.set(0, 0.8, 3)
   }
 
   #createRenderer() {
@@ -233,6 +233,9 @@ class App {
   #createControls() {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
     this.controls.enableDamping = true
+    this.controls.autoRotate = true
+    this.controls.maxPolarAngle = Math.PI / 1.6
+    this.controls.target = new Vector3(0, 0.4, 0)
   }
 
   #createClock() {
