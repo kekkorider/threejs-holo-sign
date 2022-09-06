@@ -6,7 +6,7 @@ export const ScreenMaterial = new ShaderMaterial({
   transparent: true,
   side: DoubleSide,
   uniforms: {
-    u_Color: { value: new Color(0x4feaff) },
+    u_Color: { value: new Color(0x0a2c60) },
     u_Opacity: { value: 0 },
     u_Time: { value: 0 },
     t_AlphaMap: { value: null }

@@ -8,13 +8,20 @@ import {
   Vector2,
   TextureLoader,
   RepeatWrapping,
-  DoubleSide
+  DoubleSide,
+  Color
 } from 'three'
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 // Remove this if you don't need to load any 3D model
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass'
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass'
+import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader'
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass'
 
 import { gsap } from 'gsap'
 
@@ -43,6 +50,7 @@ class App {
     this.#addListeners()
     this.#createControls()
     this.#createLoaders()
+    this.#createPostprocess()
 
     await this.#loadTextures()
 
@@ -79,7 +87,7 @@ class App {
   }
 
   #render() {
-    this.renderer.render(this.scene, this.camera)
+    this.composer.render()
   }
 
   #createScene() {
@@ -88,7 +96,7 @@ class App {
 
   #createCamera() {
     this.camera = new PerspectiveCamera(75, this.screen.x / this.screen.y, 0.1, 100)
-    this.camera.position.set(0, 1.3, 3)
+    this.camera.position.set(0, 0.6, 2.7)
   }
 
   #createRenderer() {
@@ -103,6 +111,19 @@ class App {
     this.renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio))
     this.renderer.setClearColor(0x000000)
     this.renderer.physicallyCorrectLights = true
+  }
+
+  #createPostprocess() {
+    this.renderPass = new RenderPass(this.scene, this.camera)
+
+    this.bloomPass = new UnrealBloomPass(this.screen, 0.95, 0.64, 0.27)
+
+    this.fxaaPass = new ShaderPass(FXAAShader)
+
+    this.composer = new EffectComposer(this.renderer)
+    this.composer.addPass(this.renderPass)
+    this.composer.addPass(this.fxaaPass)
+    this.composer.addPass(this.bloomPass)
   }
 
   #createLoaders() {
@@ -173,6 +194,8 @@ class App {
         this.sign.material = NeonMaterial.clone()
         this.sign.material.side = DoubleSide
         this.sign.material.transparent = true
+        this.sign.material.color.setHex(0x146caf)
+        this.sign.material.emissiveIntensity = 0.91
         this.sign.userData.defaultPosY = this.sign.position.y
 
         this.signScreen = this.mesh.getObjectByName('Sign_Screen')
@@ -198,7 +221,7 @@ class App {
       .addLabel('start')
 
       .fromTo(this.holo.material.uniforms.u_Progress1, { value: 0 }, { value: 1, duration: 1.25, overwrite: true }, 'start')
-      .fromTo(this.holo.material.uniforms.u_Progress2, { value: 0 }, { value: 1, duration: 1.25, overwrite: true }, 'start+=0.16')
+      .fromTo(this.holo.material.uniforms.u_Progress2, { value: 0 }, { value: 1, duration: 1.25, overwrite: true }, 'start+=0.13')
       .fromTo(this.holo.material.uniforms.u_Progress3, { value: 0 }, { value: 1, duration: 1.25, overwrite: true }, 'start+=0.28')
 
       .addLabel('animateInSign', 'start+=1')
@@ -231,6 +254,7 @@ class App {
     this.camera.updateProjectionMatrix()
 
     this.renderer.setSize(this.screen.x, this.screen.y)
+    this.composer.setSize(this.screen.x, this.screen.y)
   }
 }
 

@@ -24,7 +24,7 @@ void main() {
   float alphaMapB = texture2D(t_AlphaMap, vUv * vec2(0.0, 0.8) + vec2(0.0, u_Time*0.03)).b;
 
   // Noise
-  float noisy = noise(floor(vUv*1000.) + floor(random(u_Time)*100.0));
+  float noisy = noise(floor(vUv*1300.) + floor(random(u_Time)*100.0));
   noisy *= alphaMapB;
 
   // Fresnel

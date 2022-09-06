@@ -1,7 +1,7 @@
 import { MeshStandardMaterial } from 'three'
 
 export const LightsMaterial = new MeshStandardMaterial({
-  emissive: 0xE23027,
+  emissive: 0xac540c,
   color: 0xffffff,
-  emissiveIntensity: 2
+  emissiveIntensity: 1.37
 })

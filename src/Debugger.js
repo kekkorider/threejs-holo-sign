@@ -7,6 +7,7 @@ export class Debugger {
 
     this.#createPanel()
     this.#createSceneConfig()
+    this.#createBloomConfig()
     this.#createBaseConfig()
     this.#createPipesConfig()
     this.#createPointLightsConfig()
@@ -46,8 +47,17 @@ export class Debugger {
     })
   }
 
+  #createBloomConfig() {
+    const folder = this.pane.addFolder({ title: 'Postprocess - Bloom' })
+
+    folder.addInput(this.app.bloomPass, 'enabled', { label: 'Enabled' })
+    folder.addInput(this.app.bloomPass, 'threshold', { label: 'Threshold', min: 0, max: 1 })
+    folder.addInput(this.app.bloomPass, 'strength', { label: 'Strength', min: 0, max: 3 })
+    folder.addInput(this.app.bloomPass, 'radius', { label: 'Radius', min: 0, max: 1 })
+  }
+
   #createBaseConfig() {
-    const folder = this.pane.addFolder({ title: 'Base' })
+    const folder = this.pane.addFolder({ title: 'Base', expanded: false })
     const mesh = this.app.scene.getObjectByName('Base')
 
     this.#createColorControl(mesh, folder)
@@ -55,32 +65,30 @@ export class Debugger {
   }
 
   #createPipesConfig() {
-    const folder = this.pane.addFolder({ title: 'Pipes' })
+    const folder = this.pane.addFolder({ title: 'Pipes', expanded: false })
     const mesh = this.app.scene.getObjectByName('Base_Pipes')
 
     this.#createColorControl(mesh, folder)
   }
 
   #createPointLightsConfig() {
-    const folder = this.pane.addFolder({ title: 'Point Lights' })
+    const folder = this.pane.addFolder({ title: 'Point Lights', expanded: false })
     const mesh = this.app.scene.getObjectByName('Base_PointLights')
 
-    this.#createColorControl(mesh, folder)
     this.#createEmissiveControl(mesh, folder)
     this.#createEmissiveIntensityControl(mesh, folder)
   }
 
   #createRoundLightConfig() {
-    const folder = this.pane.addFolder({ title: 'Round Light' })
+    const folder = this.pane.addFolder({ title: 'Round Light', expanded: false })
     const mesh = this.app.scene.getObjectByName('Base_RoundLight')
 
-    this.#createColorControl(mesh, folder)
     this.#createEmissiveControl(mesh, folder)
     this.#createEmissiveIntensityControl(mesh, folder)
   }
 
   #createHoloConfig() {
-    const folder = this.pane.addFolder({ title: 'Holo' })
+    const folder = this.pane.addFolder({ title: 'Holo', expanded: false })
     const mesh = this.app.scene.getObjectByName('Holo')
 
     folder.addInput(mesh.material.uniforms.u_Progress1, 'value', { label: 'Progress 1', min: 0, max: 1 })
@@ -98,7 +106,7 @@ export class Debugger {
   }
 
   #createScreenConfig() {
-    const folder = this.pane.addFolder({ title: 'Screen' })
+    const folder = this.pane.addFolder({ title: 'Screen', expanded: false })
     const border = this.app.scene.getObjectByName('Sign')
 
     this.#createEmissiveControl(border, folder, 'Border color')
